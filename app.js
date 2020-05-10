@@ -6,9 +6,8 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 
 const userRouters = require('./api/routes/user')
-// const categoryRouters = require('./api/routers/category')
-// const noteRouters = require('./api/routers/note')
-
+const testRouters = require('./api/routes/test')
+const questionRouters = require('./api/routes/question')
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useNewUrlParser', true);
@@ -28,8 +27,8 @@ app.use(cors())
 
 
 app.use('/users', userRouters)
-// app.use('/categories', categoryRouters)
-// app.use('/notes', noteRouters)
+app.use('/tests', testRouters)
+app.use('/questions', questionRouters)
 
 app.use((req, res, next)=>{
     const err = new Error('Not found')

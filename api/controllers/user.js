@@ -92,7 +92,10 @@ exports.sign_up = (req, res, next) => {
     .exec().then(user => {
       if (user.length > 0) {
         return res.status(409).json({
-          ms: "mail exists"
+          sucess: false,
+          result : {
+            message: 'Email đã tồn tại'
+          }
         })
       }
       else {
@@ -110,6 +113,7 @@ exports.sign_up = (req, res, next) => {
               name: req.body.name,
               cardId: req.body.cardId,
               birthday : req.body.birthday,
+              gender: req.body.gender,
               address: req.body.address,
               phoneNumber: req.body.phoneNumber,
               type: req.body.type,

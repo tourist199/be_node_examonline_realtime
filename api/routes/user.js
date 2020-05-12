@@ -6,7 +6,7 @@ router.post("/login", UserController.user_login)
 
 router.get("/", UserController.get_user)
 
-router.post("/signup", UserController.sign_up)
+router.post("/register", UserController.sign_up)
 
 router.delete("/:userId", UserController.delete_user)
 

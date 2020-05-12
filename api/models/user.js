@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema({
     password: {type:String , required : true},
     token : {type: String},
     cardId : {type: String},
+    gender: {type: String},
     birthday: {type: Date, require: true},
     address: {type: String},
     phoneNumber: {type: String},

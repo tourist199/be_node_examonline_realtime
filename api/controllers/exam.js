@@ -7,13 +7,7 @@ module.exports.getAllExam = (req, res) => {
         .exec()
         .then(docs => {
             docs.forEach(ele => {
-                result.push({
-                    _id: ele._id,
-                    title: ele.title,
-                    description: ele.description,
-                    createAt: ele.createAt,
-                    status: ele.status
-                });
+                result.push(ele);
             });
             res.status(200).json(result);
         })
@@ -26,11 +20,9 @@ module.exports.getAllExam = (req, res) => {
         });
 }
 
-module.exports.getTestByID = (req, res, next) => {
+module.exports.getExamByID = (req, res, next) => {
     const id = req.params.id;
-
-    Test.findOne({ _id: id })
-        .populate('questions')
+    Exam.findOne({ _id: id })
         .exec()
         .then(docs => {
             res.status(200).json(docs);
@@ -42,14 +34,14 @@ module.exports.getTestByID = (req, res, next) => {
         });
 }
 
-module.exports.insertTest = (req, res) => {
+module.exports.insertExam = (req, res) => {
     var data = req.body;
-    var test = new Test({
+    var exam = new Exam({
         _id: new mongoose.Types.ObjectId(),
         ...data
     });
 
-    test
+    exam
         .save()
         .then(docs => {
             if (docs) {
@@ -68,11 +60,11 @@ module.exports.insertTest = (req, res) => {
         });
 }
 
-module.exports.updateTest = (req, res, next) => {
+module.exports.updateExam = (req, res, next) => {
     const id = req.params.id;
     const data = req.body;
 
-    Test.find({ _id: id })
+    Exam.find({ _id: id })
         .updateOne({ $set: data })
         .exec()
         .then(result => {
@@ -91,28 +83,28 @@ module.exports.updateTest = (req, res, next) => {
         })
 }
 
-module.exports.deleteTest = (req, res, next) => {
+module.exports.deleteExam = (req, res, next) => {
     var id = req.params.id;
 
-    Test.findByIdAndRemove(id)
+    Exam.findByIdAndRemove(id)
         .then(docs => {
             if (!docs) {
                 return res.status(404).send({
-                    message: "Test not found with id " + id
+                    message: "Exam not found with id " + id
                 });
             }
             return res.status(200).json({
-                message: "Test delete success",
+                message: "Exam delete success",
                 success: true
             });
         }).catch(err => {
             if (err.kind === 'ObjectId' || err.name === 'NotFound') {
                 return res.status(404).send({
-                    message: "Test not found with id " + id
+                    message: "Exam not found with id " + id
                 });
             }
             return res.status(500).send({
-                message: "Could not delete test with id " + id
+                message: "Could not delete Exam with id " + id
             });
         });
 }

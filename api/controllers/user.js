@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
+const queryString = require('query-string')
 
 exports.user_login = (req, res, next) => {
   console.log(req.body.email, req.body.password);
@@ -72,11 +73,20 @@ exports.user_login = (req, res, next) => {
 }
 
 exports.get_user = (req, res, next) => {
+  let page = parseInt(req.params.page) - 1
+  console.log(page);
+  
+  skipRecord = page ? 5 * page : 0
+  console.log(skipRecord);
+  
   User.find()
+    .skip(skipRecord)
+    .limit(5)
     .exec()
     .then(rs => {
       res.status(200).json({
-        rs
+        success: true,
+        result: rs
       })
     })
     .catch(err => {
@@ -93,7 +103,7 @@ exports.sign_up = (req, res, next) => {
       if (user.length > 0) {
         return res.status(409).json({
           sucess: false,
-          result : {
+          result: {
             message: 'Email đã tồn tại'
           }
         })
@@ -112,7 +122,7 @@ exports.sign_up = (req, res, next) => {
               password: hash,
               name: req.body.name,
               cardId: req.body.cardId,
-              birthday : req.body.birthday,
+              birthday: req.body.birthday,
               gender: req.body.gender,
               address: req.body.address,
               phoneNumber: req.body.phoneNumber,
@@ -144,8 +154,12 @@ exports.delete_user = (req, res, next) => {
     .exec()
     .then(rs => {
       res.status(200).json({
-        ms: 'user deleted',
-        rs
+        success: true,
+        result: {
+          ...rs,
+          message: 'Deleted user'
+        }
+        
       })
     })
     .catch(err => {

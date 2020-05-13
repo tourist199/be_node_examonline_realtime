@@ -4,7 +4,7 @@ const UserController = require('../controllers/user')
 
 router.post("/login", UserController.user_login)
 
-router.get("/", UserController.get_user)
+router.get("/:page", UserController.get_user)
 
 router.post("/register", UserController.sign_up)
 

@@ -24,7 +24,7 @@ exports.user_login = (req, res, next) => {
           })
         }
         if (rs) {
-          const { type, name } = user[0]
+          const { type, name, _id } = user[0]
           const token = jwt.sign({
             email: user[0].email,
             userId: user[0]._id
@@ -61,7 +61,8 @@ exports.user_login = (req, res, next) => {
               message: 'Login success',
               token,
               type,
-              name
+              name,
+              _id
             }
           })
         }
@@ -72,21 +73,27 @@ exports.user_login = (req, res, next) => {
     })
 }
 
-exports.get_user = (req, res, next) => {
+exports.get_user = async (req, res, next) => {
   let page = parseInt(req.params.page) - 1
   console.log(page);
   
   skipRecord = page ? 5 * page : 0
   console.log(skipRecord);
   
+  let num = await User.count({})
   User.find()
     .skip(skipRecord)
     .limit(5)
     .exec()
     .then(rs => {
+      console.log(rs);
+      
       res.status(200).json({
         success: true,
-        result: rs
+        result: {
+          listUser: rs,
+          total: num
+        }
       })
     })
     .catch(err => {

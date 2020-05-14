@@ -22,13 +22,15 @@ app.use(morgan('dev'))
 app.use(bodyParser.urlencoded({extended : false}))
 app.use(bodyParser.json())
 
+const checkAuth = require('./api/middleware/check-auth')
+
 
 app.use(cors())
 
 
 app.use('/users', userRouters)
-app.use('/tests', testRouters)
-app.use('/questions', questionRouters)
+app.use('/tests', checkAuth, testRouters)
+app.use('/questions', checkAuth, questionRouters)
 
 app.use((req, res, next)=>{
     const err = new Error('Not found')

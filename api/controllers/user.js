@@ -2,11 +2,8 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
-const queryString = require('query-string')
 
 exports.user_login = (req, res, next) => {
-  console.log(req.body.email, req.body.password);
-
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
@@ -27,7 +24,8 @@ exports.user_login = (req, res, next) => {
           const { type, name, _id } = user[0]
           const token = jwt.sign({
             email: user[0].email,
-            userId: user[0]._id
+            userId: user[0]._id,
+            type: user[0].type,
           },
             process.env.JWT_KEY,
             {

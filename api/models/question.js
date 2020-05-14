@@ -2,11 +2,11 @@ const mongoose = require('mongoose')
 
 const questionSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    title: { type: String, required: true },
+    title: { type: String },
     image: { type: String },
-    description: { type: String, required: true },
-    answers: { type: Array, required: true },
-    result: { type: String, required: true },
+    description: { type: String},
+    answers: { type: Array},
+    result: { type: String },
     testId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Test'

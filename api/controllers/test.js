@@ -1,5 +1,7 @@
 var Test = require('../models/test')
+var Question = require('../models/question')
 const mongoose = require('mongoose')
+var convertToObjectId = require('mongodb').ObjectId;
 
 module.exports.getAllTest = (req, res) => {
     var result = [];
@@ -43,28 +45,56 @@ module.exports.getTestByID = (req, res, next) => {
         });
 }
 
-module.exports.insertTest = (req, res) => {
+module.exports.insertTestAndQuestion = (req, res) => {
     var data = req.body;
+    console.log(data);
+
     var test = new Test({
         _id: new mongoose.Types.ObjectId(),
-        ...data
+        title: data.title,
+        description: data.description,
+        createAt: data.createAt,
+        createdBy: convertToObjectId(data.createdBy),
+        status: data.status
     });
 
     test
         .save()
         .then(docs => {
             if (docs) {
+                console.log(docs);
+                data.listQuestion.forEach(ele => {
+                    if (ele._id) {
+                        Question.find({ _id: ele._id })
+                            .updateOne({ $set: ele })
+                            .exec()
+                    } else {
+                        var item = new Question({ ...ele, testId: convertToObjectId(docs._id), _id: new mongoose.Types.ObjectId() });
+                        item.save(function (err, success) {
+                            if (err) return console.error(err);
+                            console.log(success);
+                        });
+                    }
+
+                });
+
                 res.status(201).json({
-                    data: docs,
-                    message: "success",
-                    success: true
+                    success: true,
+                    result: {
+                        message: "Add new test and quesion successfully",
+                        data: questions
+                    }
                 })
             }
         })
         .catch(err => {
             res.status(500).json({
                 error: err,
-                success: false
+                success: true,
+                result: {
+                    message: "Add new test and quesion successfully",
+                    data: questions
+                }
             })
         });
 }

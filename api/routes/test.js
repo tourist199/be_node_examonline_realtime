@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const TestController = require('../controllers/test')
 
-router.post("/insert", TestController.insertTest)
+router.post("/insert", TestController.insertTestAndQuestion)
 
 router.get("/getAll", TestController.getAllTest)
 

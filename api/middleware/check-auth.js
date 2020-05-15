@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
         User.findOne({ token : token })
             .exec()
             .then(user => {
-                console.log(user,token);
+                // console.log(user,token);
                 if (!user) {
                     return res.status(403).json({
                         tokensai: 'no accept',
@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
                 }
                 const decoded = jwt.verify(token, process.env.JWT_KEY);
                 req.userData = decoded;
-                console.log(decoded);
+                // console.log(decoded);
                 
                 
                 next()

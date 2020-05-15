@@ -4,9 +4,14 @@ const mongoose = require('mongoose')
 var convertToObjectId = require('mongodb').ObjectId;
 
 module.exports.getAllTest = (req, res) => {
+    let page = parseInt(req.params.page) - 1
+    skipRecord = page ? 5 * page : 0
+
+    let userData = req.userData
     var result = [];
-    Test.find()
-        .populate('questions')
+    Test.find({ createdBy: userData.userId })
+        .skip(skipRecord)
+        .limit(5)
         .exec()
         .then(docs => {
             docs.forEach(ele => {
@@ -18,7 +23,13 @@ module.exports.getAllTest = (req, res) => {
                     status: ele.status
                 });
             });
-            res.status(200).json(result);
+            res.status(200).json({
+                success: true,
+                result: {
+                    result,
+                    total: docs.length
+                }
+            });
         })
         .catch(err => {
             res.status(500).json({

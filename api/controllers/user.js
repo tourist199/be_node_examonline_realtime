@@ -73,10 +73,7 @@ exports.user_login = (req, res, next) => {
 
 exports.get_user = async (req, res, next) => {
   let page = parseInt(req.params.page) - 1
-  console.log(page);
-  
   skipRecord = page ? 5 * page : 0
-  console.log(skipRecord);
   
   let num = await User.count({})
   User.find()

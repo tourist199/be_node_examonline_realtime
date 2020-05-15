@@ -4,7 +4,7 @@ const TestController = require('../controllers/test')
 
 router.post("/insert", TestController.insertTestAndQuestion)
 
-router.get("/getAll", TestController.getAllTest)
+router.get("/getTestsByTeacher/:page", TestController.getAllTest)
 
 router.get("/:id", TestController.getTestByID)
 

@@ -13,8 +13,6 @@ module.exports.insertManyQuestion = (req, res, next) => {
             .exec()
         } else {
             var item = new Question({ ...ele, testId: convertToObjectId(testId), _id: new mongoose.Types.ObjectId() });
-            console.log(item);
-
             item.save(function (err, success) {
                 if (err) return console.error(err);
                 console.log(success);

@@ -13,5 +13,6 @@ router.delete("/:userId",checkAuth, UserController.delete_user)
 
 router.post("/check-token",checkAuth, UserController.check_token)
 
+router.post("/change-user-info",checkAuth, UserController.change_user_info)
 
 module.exports = router

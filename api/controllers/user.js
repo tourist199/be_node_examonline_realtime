@@ -194,3 +194,31 @@ exports.check_token = (req, res, next) => {
       })
     })
 }
+
+exports.change_user_info = (req, res, next) => {
+  var { body, userData }= req
+  console.log(userData);
+  
+  User.findOneAndUpdate(
+    { _id: userData.userId },
+    {...body}
+  )
+    .then(data => {
+      res.status(200).json({
+        success: true,
+        result: {
+          data: data,
+          message: 'Update thanh cong!'
+        }
+      })
+    })
+    .catch(err => {
+      res.status(400).json({
+        success: false,
+        result: {
+          err: err,
+          message: 'Update that bai!'
+        }
+      })
+    })
+}

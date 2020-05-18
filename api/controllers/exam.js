@@ -32,8 +32,39 @@ module.exports.getExamsByTeacher = (req, res) => {
         });
 }
 
+module.exports.getExamById = (req, res) => {
+
+    Exam.findOne({ _id: req.params.id })
+        .populate('testId', 'title')
+        .then(docs => {
+            ExamStudent.find({ examId: req.params.id })
+            .populate('studentId', 'name email')
+                .exec()
+                .then(rs => {
+                    res.status(200).json({
+                        success: true,
+                        result: {
+                            exam: docs, 
+                            listStudent: rs
+                        }
+                    });
+                })
+
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    error: err,
+                    message: "fails",
+                }
+            });
+        });
+}
+
 module.exports.getExamByID = (req, res, next) => {
     const id = req.params.id;
+    
     Exam.findOne({ _id: id })
         .exec()
         .then(docs => {

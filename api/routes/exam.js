@@ -2,9 +2,9 @@ const express = require('express')
 const router = express.Router()
 const ExamController = require('../controllers/exam')
 
-router.get("/get-exams-teacher", ExamController.getExamsByTeacher)
+router.get("/get-exam/:id", ExamController.getExamById)
 
-// router.get("/:page", ExamController.get_user)
+router.get("/get-exams-teacher", ExamController.getExamsByTeacher)
 
 router.post("/insertExam", ExamController.insertExam)
 

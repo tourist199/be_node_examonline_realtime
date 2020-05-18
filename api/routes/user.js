@@ -7,7 +7,7 @@ router.post("/login", UserController.user_login)
 
 router.get("/get-student", UserController.get_students)
 
-router.get("/:page", UserController.get_user)
+router.get("/get-users", UserController.get_user)
 
 router.post("/register", UserController.sign_up)
 

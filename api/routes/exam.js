@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const ExamController = require('../controllers/exam')
 
-router.get("/get-exams", ExamController.getExamsByTeacher)
+router.get("/get-exams-teacher", ExamController.getExamsByTeacher)
 
 // router.get("/:page", ExamController.get_user)
 

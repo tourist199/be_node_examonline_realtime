@@ -49,7 +49,8 @@ module.exports.insertExam = (req, res) => {
         description: data.description,
         testId: data.testId,
         timeStart: data.timeStart,
-        timeEnd: data.timeEnd
+        timeEnd: data.timeEnd,
+        createdBy: data.createdBy
     });
     console.log(data.listStudent);
 

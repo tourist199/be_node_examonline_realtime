@@ -5,7 +5,7 @@ const examSchema = mongoose.Schema({
     title: {type: String, required : true},
     description : {type: String, required: true},
     testId: { type: mongoose.Schema.Types.ObjectId, ref : 'Test' },
-    createBy: { type: mongoose.Schema.Types.ObjectId, ref : 'User' },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref : 'User' },
     timeStart: {type: Date, required: true},
     timeEnd: {type: Date, required: true},
 })

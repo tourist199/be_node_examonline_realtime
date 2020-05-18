@@ -7,8 +7,6 @@ exports.user_login = (req, res, next) => {
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
-      console.log(user[0]);
-
       if (user.length < 1) {
         return res.status(401).json({
           ms: 'tai khoan hoac mat khau khong dung'
@@ -37,16 +35,7 @@ exports.user_login = (req, res, next) => {
             .updateOne({ $set: { token: token } })
             .exec()
             .then(result => {
-              if (result) {
-                console.log(
-                  {
-                    data: result,
-                    message: "success",
-                    msg: "update token thanh cong"
-                  }
-                );
-
-              }
+             
             })
             .catch(err => {
               console.log(err, 'loi cap nhat token');
@@ -74,15 +63,12 @@ exports.user_login = (req, res, next) => {
 exports.get_user = async (req, res, next) => {
   let page = parseInt(req.params.page) - 1
   skipRecord = page ? 5 * page : 0
-  
   let num = await User.count({})
   User.find()
     .skip(skipRecord)
     .limit(5)
     .exec()
     .then(rs => {
-      console.log(rs);
-      
       res.status(200).json({
         success: true,
         result: {
@@ -92,7 +78,24 @@ exports.get_user = async (req, res, next) => {
       })
     })
     .catch(err => {
-      console.log(err);
+      res.status(500).json({
+        err
+      })
+    })
+}
+
+exports.get_students = (req, res, next) => {
+  User.find({type: 'STUDENT'})
+    .exec()
+    .then(rs => {
+      res.status(200).json({
+        success: true,
+        result: {
+          listStudent: rs
+        }
+      })
+    })
+    .catch(err => {
       res.status(500).json({
         err
       })
@@ -187,7 +190,6 @@ exports.check_token = (req, res, next) => {
         })
     })
     .catch(err => {
-      console.log(err);
       res.status(200).json({
         err,
         rs: false
@@ -197,8 +199,6 @@ exports.check_token = (req, res, next) => {
 
 exports.change_user_info = (req, res, next) => {
   var { body, userData }= req
-  console.log(userData);
-  
   User.findOneAndUpdate(
     { _id: userData.userId },
     {...body}

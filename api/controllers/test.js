@@ -3,10 +3,9 @@ var Question = require('../models/question')
 const mongoose = require('mongoose')
 var convertToObjectId = require('mongodb').ObjectId;
 
-module.exports.getAllTest = (req, res) => {
-    let page = parseInt(req.params.page) - 1
+module.exports.getAllTestPagination = (req, res) => {
+    let page = parseInt(req.query.page) - 1
     skipRecord = page ? 5 * page : 0
-
     let userData = req.userData
     var result = [];
     Test.find({ createdBy: userData.userId })
@@ -42,14 +41,94 @@ module.exports.getAllTest = (req, res) => {
         });
 }
 
-module.exports.getTestByID = (req, res, next) => {
-    const id = req.params.id;
-
-    Test.findOne({ _id: id })
-        .populate('questions')
+module.exports.getAllTest = (req, res) => {
+    let page = parseInt(req.query.page) - 1
+    skipRecord = page ? 5 * page : 0
+    let userData = req.userData
+    var result = [];
+    Test.find({ createdBy: userData.userId })
+        .skip(skipRecord)
+        .limit(5)
         .exec()
         .then(docs => {
-            res.status(200).json(docs);
+            docs.forEach(ele => {
+                result.push({
+                    _id: ele._id,
+                    title: ele.title,
+                    description: ele.description,
+                    createAt: ele.createAt,
+                    status: ele.status
+                });
+            });
+            res.status(200).json({
+                success: true,
+                result: {
+                    result,
+                    total: docs.length
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                result: {
+                    error: err,
+                    message: "fails"
+                },
+                success: false
+            });
+        });
+}
+
+module.exports.getTestsWaitting = (req, res) => {
+    let page = parseInt(req.query.page) - 1
+    skipRecord = page ? 5 * page : 0
+    var result = [];
+    Test.find({ status: 'WAITTING' })
+        .skip(skipRecord)
+        .limit(5)
+        .exec()
+        .then(docs => {
+            docs.forEach(ele => {
+                result.push({
+                    _id: ele._id,
+                    title: ele.title,
+                    description: ele.description,
+                    createAt: ele.createAt,
+                    status: ele.status
+                });
+            });
+            res.status(200).json({
+                success: true,
+                result: {
+                    result,
+                    total: docs.length
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                result: {
+                    error: err,
+                    message: "fails"
+                },
+                success: false
+            });
+        });
+}
+
+module.exports.getTestByID = (req, res, next) => {
+    const id = req.params.id;
+    Test.findOne({ _id: id })
+        .exec()
+        .then(doc => {
+            Question.find({ testId: id })
+                .exec()
+                .then(docs => {
+                    res.status(200).json({
+                        success: true,
+                        result: { test: doc, listQuestion: docs }
+                    });
+                })
         })
         .catch(err => {
             res.status(500).json({
@@ -60,8 +139,6 @@ module.exports.getTestByID = (req, res, next) => {
 
 module.exports.insertTestAndQuestion = (req, res) => {
     var data = req.body;
-    console.log(data);
-
     var test = new Test({
         _id: new mongoose.Types.ObjectId(),
         title: data.title,
@@ -70,67 +147,113 @@ module.exports.insertTestAndQuestion = (req, res) => {
         createdBy: convertToObjectId(data.createdBy),
         status: data.status
     });
-
     test
         .save()
         .then(docs => {
             if (docs) {
-                console.log(docs);
-                data.listQuestion.forEach(ele => {
-                    if (ele._id) {
-                        Question.find({ _id: ele._id })
-                            .updateOne({ $set: ele })
-                            .exec()
-                    } else {
-                        var item = new Question({ ...ele, testId: convertToObjectId(docs._id), _id: new mongoose.Types.ObjectId() });
-                        item.save(function (err, success) {
-                            if (err) return console.error(err);
-                            console.log(success);
-                        });
-                    }
-
-                });
-
-                res.status(201).json({
-                    success: true,
-                    result: {
-                        message: "Add new test and quesion successfully",
-                        data: questions
-                    }
-                })
+                if (data.listQuestion) {
+                    Question.bulkWrite(
+                        data.listQuestion.map((item) => {
+                            if (!item._id)
+                                return {
+                                    insertOne: {
+                                        document: {
+                                            _id: new mongoose.Types.ObjectId(),
+                                            title: item.title,
+                                            description: item.description,
+                                            answers: item.answers,
+                                            result: item.result,
+                                            testId: docs._id
+                                        }
+                                    }
+                                }
+                            else
+                                return {
+                                    updateOne: {
+                                        filter: { _id: item._id },
+                                        update: {
+                                            ...item
+                                        },
+                                        upsert: true
+                                    }
+                                }
+                        })
+                    ).then(rs => {
+                        res.status(201).json({
+                            success: true,
+                            result: {
+                                message: "Add new test and quesion successfully",
+                                data: rs
+                            }
+                        })
+                    })
+                }
             }
         })
-        .catch(err => {
+        .catch(note => {
             res.status(500).json({
-                error: err,
-                success: true,
+                success: false,
                 result: {
-                    message: "Add new test and quesion successfully",
-                    data: questions
+                    message: "Add failed",
+                    note
                 }
             })
         });
 }
 
 module.exports.updateTest = (req, res, next) => {
-    const id = req.params.id;
+    const {id} = req.params;
     const data = req.body;
-
     Test.find({ _id: id })
         .updateOne({ $set: data })
         .exec()
         .then(result => {
-            if (result) {
-                res.status(200).json({
-                    data: result,
-                    message: "success",
-                    success: true
+            if (data.listQuestion) {
+                Question.bulkWrite(
+                    data.listQuestion.map((item) => {
+                        if (!item._id)
+                            return {
+                                insertOne: {
+                                    document: {
+                                        _id: new mongoose.Types.ObjectId(),
+                                        title: item.title,
+                                        description: item.description,
+                                        answers: item.answers,
+                                        result: item.result,
+                                        testId: id
+                                    }
+                                }
+                            }
+                        else
+                            return {
+                                updateOne: {
+                                    filter: { _id: item._id },
+                                    update: {
+                                        ...item
+                                    }
+                                    // ,upsert: true
+                                }
+                            }
+                    }),
+                    
+                ).then(rs => {
+                    res.status(201).json({
+                        success: true,
+                        result: {
+                            message: "Update test and quesion successfully",
+                            data: rs
+                        }
+                    })
                 })
             }
         })
         .catch(err => {
             res.status(500).json({
-                error: err
+                success: false,
+                result: {
+                    err,
+                    message: "Update failed"
+                }
             })
         })
 }
@@ -145,10 +268,16 @@ module.exports.deleteTest = (req, res, next) => {
                     message: "Test not found with id " + id
                 });
             }
-            return res.status(200).json({
-                message: "Test delete success",
-                success: true
-            });
+            Question.deleteMany({ testId: id })
+                .then(doc => {
+                    return res.status(200).json({
+                        success: true,
+                        result: {
+                            message: "Test delete success",
+                            doc
+                        }
+                    });
+                })
         }).catch(err => {
             if (err.kind === 'ObjectId' || err.name === 'NotFound') {
                 return res.status(404).send({

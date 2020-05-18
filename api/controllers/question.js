@@ -9,8 +9,8 @@ module.exports.insertManyQuestion = (req, res, next) => {
     questions.forEach(ele => {
         if (ele._id) {
             Question.find({ _id: ele._id })
-            .updateOne({ $set: ele })
-            .exec()
+                .updateOne({ $set: ele })
+                .exec()
         } else {
             var item = new Question({ ...ele, testId: convertToObjectId(testId), _id: new mongoose.Types.ObjectId() });
             item.save(function (err, success) {

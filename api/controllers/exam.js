@@ -1,7 +1,9 @@
 var Exam = require('../models/exam')
+var ExamStudent = require('../models/exam_student')
 const mongoose = require('mongoose')
 
-module.exports.getAllExam = (req, res) => {
+module.exports.getExamsByTeacher = (req, res) => {
+    let userData = req.userData
     var result = [];
     Exam.find()
         .exec()
@@ -9,13 +11,18 @@ module.exports.getAllExam = (req, res) => {
             docs.forEach(ele => {
                 result.push(ele);
             });
-            res.status(200).json(result);
+            res.status(200).json({
+                success: true,
+                result
+            });
         })
         .catch(err => {
             res.status(500).json({
-                error: err,
-                message: "fails",
-                success: false
+                success: false,
+                result: {
+                    error: err,
+                    message: "fails",
+                }
             });
         });
 }
@@ -38,17 +45,41 @@ module.exports.insertExam = (req, res) => {
     var data = req.body;
     var exam = new Exam({
         _id: new mongoose.Types.ObjectId(),
-        ...data
+        title: data.title,
+        description: data.description,
+        testId: data.testId,
+        timeStart: data.timeStart,
+        timeEnd: data.timeEnd
     });
+    console.log(data.listStudent);
 
     exam
         .save()
-        .then(docs => {
+        .then(async docs => {
             if (docs) {
+                let idExam = docs._id
+                let docsDeleteExam = await ExamStudent
+                    .deleteMany({ examId: idExam })
+
+                let docsInsertExam = await ExamStudent
+                    .insertMany(
+                        data.listStudent.map(item => {
+                            return {
+                                _id: new mongoose.Types.ObjectId(),
+                                examId: idExam,
+                                studentId: item
+                            }
+                        })
+                    )
+
                 res.status(201).json({
-                    data: docs,
-                    message: "success",
-                    success: true
+                    success: true,
+                    result: {
+                        data: docs,
+                        message: "success",
+                        docsDeleteExam,
+                        docsInsertExam
+                    }
                 })
             }
         })

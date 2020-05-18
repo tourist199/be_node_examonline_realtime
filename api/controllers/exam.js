@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 module.exports.getExamsByTeacher = (req, res) => {
     let userData = req.userData
     var result = [];
-    Exam.find()
+    Exam.find({ createdBy: userData.userId })
         .exec()
         .then(docs => {
             docs.forEach(ele => {

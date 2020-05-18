@@ -1,4 +1,5 @@
 var Test = require('../models/test')
+var Exam = require('../models/exam')
 var Question = require('../models/question')
 const mongoose = require('mongoose')
 var convertToObjectId = require('mongodb').ObjectId;
@@ -79,22 +80,26 @@ module.exports.getAllTest = (req, res) => {
         });
 }
 
-module.exports.getTestsWaitting = (req, res) => {
+module.exports.getTestsWaittingAdmin = (req, res) => {
     let page = parseInt(req.query.page) - 1
     skipRecord = page ? 5 * page : 0
     var result = [];
     Test.find({ status: 'WAITTING' })
+        .populate('createdBy', 'name')
         .skip(skipRecord)
         .limit(5)
         .exec()
         .then(docs => {
+            console.log(docs);
+
             docs.forEach(ele => {
                 result.push({
                     _id: ele._id,
                     title: ele.title,
                     description: ele.description,
                     createAt: ele.createAt,
-                    status: ele.status
+                    status: ele.status,
+                    nameTeacher: ele.createdBy.name
                 });
             });
             res.status(200).json({
@@ -202,7 +207,7 @@ module.exports.insertTestAndQuestion = (req, res) => {
 }
 
 module.exports.updateTest = (req, res, next) => {
-    const {id} = req.params;
+    const { id } = req.params;
     const data = req.body;
     Test.find({ _id: id })
         .updateOne({ $set: data })
@@ -235,7 +240,7 @@ module.exports.updateTest = (req, res, next) => {
                                 }
                             }
                     }),
-                    
+
                 ).then(rs => {
                     res.status(201).json({
                         success: true,
@@ -258,34 +263,99 @@ module.exports.updateTest = (req, res, next) => {
         })
 }
 
+module.exports.changeStatusTestDone = (req, res, next) => {
+    const { id } = req.params;
+    Test.find({ _id: convertToObjectId(id) })
+        .updateOne({ $set: { status: 'DONE' } })
+        .exec()
+        .then(result => {
+            res.status(202).json({
+                success: true,
+                result: {
+                    err,
+                    message: "Change Status Success - DONE"
+                }
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    err,
+                    message: "Update failed"
+                }
+            })
+        })
+}
+
+module.exports.changeStatusTestDraft = (req, res, next) => {
+    const { id } = req.params;
+    Test.find({ _id: convertToObjectId(id) })
+        .updateOne({ $set: { status: 'DRAFT' } })
+        .exec()
+        .then(result => {
+            res.status(202).json({
+                success: true,
+                result: {
+                    err,
+                    message: "Change Status Success - DONE"
+                }
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    err,
+                    message: "Update failed"
+                }
+            })
+        })
+}
+
 module.exports.deleteTest = (req, res, next) => {
     var id = req.params.id;
 
-    Test.findByIdAndRemove(id)
-        .then(docs => {
-            if (!docs) {
-                return res.status(404).send({
-                    message: "Test not found with id " + id
+    Exam.find({ testId: id })
+        .exec()
+        .then((arr) => {
+            if (arr.length >= 1)
+                return res.status(500).send({
+                    result: {
+                        message: "Khong the xoa, da co ky thi dung bo de nay",
+                        arr
+                    }
                 });
-            }
-            Question.deleteMany({ testId: id })
-                .then(doc => {
-                    return res.status(200).json({
-                        success: true,
-                        result: {
-                            message: "Test delete success",
-                            doc
+            else {
+                Test.findByIdAndRemove(id)
+                    .then(docs => {
+                        if (!docs) {
+                            return res.status(404).send({
+                                message: "Test not found with id " + id
+                            });
                         }
+                        Question.deleteMany({ testId: id })
+                            .then(doc => {
+                                return res.status(200).json({
+                                    success: true,
+                                    result: {
+                                        message: "Test delete success",
+                                        doc
+                                    }
+                                });
+                            })
+                    }).catch(err => {
+                        if (err.kind === 'ObjectId' || err.name === 'NotFound') {
+                            return res.status(404).send({
+                                message: "Test not found with id " + id
+                            });
+                        }
+                        return res.status(500).send({
+                            message: "Could not delete test with id " + id
+                        });
                     });
-                })
-        }).catch(err => {
-            if (err.kind === 'ObjectId' || err.name === 'NotFound') {
-                return res.status(404).send({
-                    message: "Test not found with id " + id
-                });
             }
-            return res.status(500).send({
-                message: "Could not delete test with id " + id
-            });
-        });
+        })
+
+
 }

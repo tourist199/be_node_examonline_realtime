@@ -9,13 +9,19 @@ exports.user_login = (req, res, next) => {
     .then(user => {
       if (user.length < 1) {
         return res.status(401).json({
-          ms: 'tai khoan hoac mat khau khong dung'
+          success: false,
+          result: {
+            message: 'tai khoan hoac mat khau khong dung'
+          }
         })
       }
       bcrypt.compare(req.body.password, user[0].password, (err, rs) => {
         if (err) {
           return res.status(401).json({
-            ms: 'invalid pass'
+            success: false,
+            result: {
+              message: 'tai khoan hoac mat khau khong dung1'
+            }
           })
         }
         if (rs) {
@@ -35,7 +41,7 @@ exports.user_login = (req, res, next) => {
             .updateOne({ $set: { token: token } })
             .exec()
             .then(result => {
-             
+
             })
             .catch(err => {
               console.log(err, 'loi cap nhat token');
@@ -54,7 +60,10 @@ exports.user_login = (req, res, next) => {
           })
         }
         return res.status(500).json({
-          err: "sai mat khau"
+          success: false,
+          result: {
+            message: 'Sai mat khau'
+          }
         })
       })
     })
@@ -85,7 +94,7 @@ exports.get_user = async (req, res, next) => {
 }
 
 exports.get_students = (req, res, next) => {
-  User.find({type: 'STUDENT'})
+  User.find({ type: 'STUDENT' })
     .exec()
     .then(rs => {
       res.status(200).json({
@@ -164,7 +173,7 @@ exports.delete_user = (req, res, next) => {
           ...rs,
           message: 'Deleted user'
         }
-        
+
       })
     })
     .catch(err => {
@@ -198,10 +207,10 @@ exports.check_token = (req, res, next) => {
 }
 
 exports.change_user_info = (req, res, next) => {
-  var { body, userData }= req
+  var { body, userData } = req
   User.findOneAndUpdate(
     { _id: userData.userId },
-    {...body}
+    { ...body }
   )
     .then(data => {
       res.status(200).json({

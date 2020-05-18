@@ -4,8 +4,13 @@ const mongoose = require('mongoose')
 
 module.exports.getExamsByTeacher = (req, res) => {
     let userData = req.userData
+    let page = parseInt(req.query.page) - 1
+    skipRecord = page ? 5 * page : 0
     var result = [];
     Exam.find({ createdBy: userData.userId })
+        .populate('testId')
+        .skip(skipRecord)
+        .limit(5)
         .exec()
         .then(docs => {
             docs.forEach(ele => {
@@ -13,7 +18,7 @@ module.exports.getExamsByTeacher = (req, res) => {
             });
             res.status(200).json({
                 success: true,
-                result
+                result: result
             });
         })
         .catch(err => {

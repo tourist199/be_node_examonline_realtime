@@ -8,6 +8,8 @@ router.get("/getTestsByTeacher", TestController.getAllTest)
 
 router.get("/getTestsWatting", TestController.getTestsWaittingAdmin)
 
+router.get("/getTestsDone", TestController.getTestsDone)
+
 router.put("/change-status-test-draft/:id", TestController.changeStatusTestDraft)
 
 router.put("/change-status-test-done/:id", TestController.changeStatusTestDone)

@@ -121,6 +121,42 @@ module.exports.getTestsWaittingAdmin = (req, res) => {
         });
 }
 
+module.exports.getTestsDone = (req, res) => {
+    let { userData } = req
+    var result = [];
+    Test.find({ status: 'DONE', createdBy: userData.userId })
+        .populate('createdBy', 'name')
+        .exec()
+        .then(docs => {
+            docs.forEach(ele => {
+                result.push({
+                    _id: ele._id,
+                    title: ele.title,
+                    description: ele.description,
+                    createAt: ele.createAt,
+                    status: ele.status,
+                    nameTeacher: ele.createdBy.name
+                });
+            });
+            res.status(200).json({
+                success: true,
+                result: {
+                    result,
+                    total: docs.length
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                result: {
+                    error: err,
+                    message: "fails"
+                },
+                success: false
+            });
+        });
+}
+
 module.exports.getTestByID = (req, res, next) => {
     const id = req.params.id;
     Test.findOne({ _id: id })

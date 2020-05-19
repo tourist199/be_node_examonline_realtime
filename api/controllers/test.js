@@ -42,11 +42,12 @@ module.exports.getAllTestPagination = (req, res) => {
         });
 }
 
-module.exports.getAllTest = (req, res) => {
+module.exports.getAllTest = async (req, res) => {
     let page = parseInt(req.query.page) - 1
     skipRecord = page ? 5 * page : 0
     let userData = req.userData
     var result = [];
+    let num = await Test.find({ createdBy: userData.userId }).count()
     Test.find({ createdBy: userData.userId })
         .skip(skipRecord)
         .limit(5)
@@ -65,7 +66,7 @@ module.exports.getAllTest = (req, res) => {
                 success: true,
                 result: {
                     result,
-                    total: docs.length
+                    total: num
                 }
             });
         })

@@ -2,11 +2,12 @@ var Exam = require('../models/exam')
 var ExamStudent = require('../models/exam_student')
 const mongoose = require('mongoose')
 
-module.exports.getExamsByTeacher = (req, res) => {
+module.exports.getExamsByTeacher = async (req, res) => {
     let userData = req.userData
     let page = parseInt(req.query.page) - 1
     skipRecord = page ? 5 * page : 0
     var result = [];
+    let num = await Exam.find({ createdBy: userData.userId }).count()
     Exam.find({ createdBy: userData.userId })
         .populate('testId')
         .skip(skipRecord)
@@ -18,7 +19,8 @@ module.exports.getExamsByTeacher = (req, res) => {
             });
             res.status(200).json({
                 success: true,
-                result: result
+                result: result,
+                total: num
             });
         })
         .catch(err => {

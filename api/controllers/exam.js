@@ -19,8 +19,11 @@ module.exports.getExamsByTeacher = async (req, res) => {
             });
             res.status(200).json({
                 success: true,
-                result: result,
-                total: num
+                result: {
+                    listExam: result,
+                    total: num
+                },
+                
             });
         })
         .catch(err => {

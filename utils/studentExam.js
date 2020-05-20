@@ -1,3 +1,4 @@
+const ExamStudent = require('../api/models/exam_student')
 class StudentExam {
     // constructor() {
     //     this.users = [];

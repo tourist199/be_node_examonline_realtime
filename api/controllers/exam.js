@@ -46,7 +46,7 @@ module.exports.getExamsStudent = async (req, res) => {
         .exec()
         .then( docs => {
             let listExam = docs.map(item => item.examId)
-            res.json(listExam)
+            res.status(200).json(listExam)
         })
         .catch(err => {
             res.status(500).json({

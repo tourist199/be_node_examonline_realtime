@@ -37,6 +37,29 @@ module.exports.getExamsByTeacher = async (req, res) => {
         });
 }
 
+module.exports.getExamsStudent = async (req, res) => {
+    let userData = req.userData
+
+    ExamStudent
+        .find({studentId: userData.userId})
+        .populate('examId')
+        .exec()
+        .then( docs => {
+            let listExam = docs.map(item => item.examId)
+            res.json(listExam)
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    error: err,
+                    message: "fails",
+                }
+            });
+        });
+
+}
+
 module.exports.getExamById = (req, res) => {
 
     Exam.findOne({ _id: req.params.id })

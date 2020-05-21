@@ -9,6 +9,7 @@ const userRouters = require('./api/routes/user')
 const testRouters = require('./api/routes/test')
 const questionRouters = require('./api/routes/question')
 const examRouters = require('./api/routes/exam')
+const examStudentRouters = require('./api/routes/exam-student')
 
 mongoose.set('useFindAndModify', false);
 mongoose.set('useNewUrlParser', true);
@@ -33,6 +34,7 @@ app.use('/users', userRouters)
 app.use('/tests', checkAuth, testRouters)
 app.use('/questions', checkAuth, questionRouters)
 app.use('/exams', checkAuth, examRouters)
+app.use('/exam-student', checkAuth, examStudentRouters)
 
 app.use((req, res, next) => {
     const err = new Error('Not found')
@@ -45,7 +47,7 @@ app.use((err, req, res, next) => {
     res.json({
         success: false,
         result: {
-            message: 'APP - FAILED',
+            message: 'APP - FAILED - SAI DUONG DAN',
             err: err
         }
     })

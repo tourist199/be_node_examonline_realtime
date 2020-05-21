@@ -23,7 +23,7 @@ module.exports.getExamsByTeacher = async (req, res) => {
                     listExam: result,
                     total: num
                 },
-                
+
             });
         })
         .catch(err => {
@@ -41,12 +41,17 @@ module.exports.getExamsStudent = async (req, res) => {
     let userData = req.userData
 
     ExamStudent
-        .find({studentId: userData.userId})
+        .find({ studentId: userData.userId })
         .populate('examId')
         .exec()
-        .then( docs => {
+        .then(docs => {
             let listExam = docs.map(item => item.examId)
-            res.status(200).json(listExam)
+            res.status(200).json({
+                success: true,
+                result: {
+                    listExam
+                }
+            })
         })
         .catch(err => {
             res.status(500).json({
@@ -66,13 +71,13 @@ module.exports.getExamById = (req, res) => {
         .populate('testId', 'title')
         .then(docs => {
             ExamStudent.find({ examId: req.params.id })
-            .populate('studentId', 'name email')
+                .populate('studentId', 'name email')
                 .exec()
                 .then(rs => {
                     res.status(200).json({
                         success: true,
                         result: {
-                            exam: docs, 
+                            exam: docs,
                             listStudent: rs
                         }
                     });
@@ -92,7 +97,7 @@ module.exports.getExamById = (req, res) => {
 
 module.exports.getExamByID = (req, res, next) => {
     const id = req.params.id;
-    
+
     Exam.findOne({ _id: id })
         .exec()
         .then(docs => {

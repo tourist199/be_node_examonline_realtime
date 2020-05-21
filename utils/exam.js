@@ -1,5 +1,5 @@
 const ExamStudent = require('../api/models/exam_student')
-class StudentExam {
+class Exam {
     // constructor() {
     //     this.users = [];
     // }
@@ -35,4 +35,4 @@ class StudentExam {
 
 }
 
-module.exports = StudentExam;
+module.exports = Exam;

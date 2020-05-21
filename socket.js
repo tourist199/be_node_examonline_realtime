@@ -1,5 +1,5 @@
 let ExamStudent = require('./api/models/exam_student')
-let StudentExam = require('./utils/studentExam')
+let exam = require('./utils/exam')
 
 /**
  * REALTIME

@@ -187,7 +187,8 @@ module.exports.insertTestAndQuestion = (req, res) => {
         description: data.description,
         createAt: data.createAt,
         createdBy: convertToObjectId(data.createdBy),
-        status: data.status
+        status: data.status,
+        totalQuestion: data.listQuestion.length
     });
     test
         .save()

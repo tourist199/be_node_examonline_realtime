@@ -9,6 +9,10 @@ const testSchema = mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    totalQuestion: {
+        type: Number,
+        default: 0
     }
 })
 

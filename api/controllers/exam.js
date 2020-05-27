@@ -1,26 +1,23 @@
 var Exam = require('../models/exam')
 var ExamStudent = require('../models/exam_student')
 const mongoose = require('mongoose')
+var convertToObjectId = require('mongodb').ObjectId;
 
-module.exports.getExamsByTeacher = async (req, res) => {
+module.exports.getExamsTeacherPage = async (req, res) => {
     let userData = req.userData
-    let page = parseInt(req.query.page) - 1
-    skipRecord = page ? 5 * page : 0
-    var result = [];
-    let num = await Exam.find({ createdBy: userData.userId }).count()
+    // let page = parseInt(req.query.page) - 1
+    // skipRecord = page ? 5 * page : 0
+    let num = await Exam.find({ createdBy: userData.userId }).countDocuments()
     Exam.find({ createdBy: userData.userId })
         .populate('testId')
-        .skip(skipRecord)
-        .limit(5)
+        // .skip(skipRecord)
+        // .limit(5)
         .exec()
         .then(docs => {
-            docs.forEach(ele => {
-                result.push(ele);
-            });
             res.status(200).json({
                 success: true,
                 result: {
-                    listExam: result,
+                    listExam: docs,
                     total: num
                 },
 
@@ -45,7 +42,8 @@ module.exports.getExamsStudent = async (req, res) => {
         .populate('examId')
         .exec()
         .then(docs => {
-            let listExam = docs.map(item => item.examId)
+            let listExam = docs.map(item => ({ ...item.examId._doc, submit: item.submit }))
+            console.log(docs);
             res.status(200).json({
                 success: true,
                 result: {
@@ -62,16 +60,43 @@ module.exports.getExamsStudent = async (req, res) => {
                 }
             });
         });
+}
 
+/**
+ * No pagination
+ */
+
+module.exports.getExamsTeacher = (req, res) => {
+    let userData = req.userData
+
+    Exam.find({ createdBy: userData.userId })
+        .populate('testId')
+        .exec()
+        .then(docs => {
+            res.status(200).json({
+                success: true,
+                result: {
+                    listExam: docs
+                }
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    error: err,
+                    message: "fails",
+                }
+            });
+        });
 }
 
 module.exports.getExamById = (req, res) => {
-
     Exam.findOne({ _id: req.params.id })
         .populate('testId', 'title')
         .then(docs => {
             ExamStudent.find({ examId: req.params.id })
-                .populate('studentId', 'name email')
+                .select('_id examId studentId')
                 .exec()
                 .then(rs => {
                     res.status(200).json({
@@ -82,7 +107,6 @@ module.exports.getExamById = (req, res) => {
                         }
                     });
                 })
-
         })
         .catch(err => {
             res.status(500).json({
@@ -128,8 +152,8 @@ module.exports.insertExam = (req, res) => {
         .then(async docs => {
             if (docs) {
                 let idExam = docs._id
-                let docsDeleteExam = await ExamStudent
-                    .deleteMany({ examId: idExam })
+                // let docsDeleteExam = await ExamStudent
+                //     .deleteMany({ examId: idExam })
 
                 let docsInsertExam = await ExamStudent
                     .insertMany(
@@ -147,7 +171,7 @@ module.exports.insertExam = (req, res) => {
                     result: {
                         data: docs,
                         message: "success",
-                        docsDeleteExam,
+                        // docsDeleteExam,
                         docsInsertExam
                     }
                 })
@@ -162,50 +186,78 @@ module.exports.insertExam = (req, res) => {
 }
 
 module.exports.updateExam = (req, res, next) => {
-    const id = req.params.id;
-    const data = req.body;
+    const { _id, title, description, timeStart, timeEnd, listStudent } = req.body;
+    Exam.findOneAndUpdate(
+        { _id: _id },
+        {
+            title, description, timeStart, timeEnd
+        },
+        { new: true }
+    )
+        .then(async docs => {
+            if (docs) {
+                let docsDeleteExam = await ExamStudent
+                    .deleteMany({ examId: _id })
 
-    Exam.find({ _id: id })
-        .updateOne({ $set: data })
-        .exec()
-        .then(result => {
-            if (result) {
-                res.status(200).json({
-                    data: result,
-                    message: "success",
-                    success: true
+                let docsInsertExam = await ExamStudent
+                    .insertMany(
+                        listStudent.map(item => {
+                            return {
+                                _id: new mongoose.Types.ObjectId(),
+                                examId: convertToObjectId(_id),
+                                studentId: convertToObjectId(item)
+                            }
+                        })
+                    )
+
+                res.status(201).json({
+                    success: true,
+                    result: {
+                        data: docs,
+                        message: "update exam success",
+                        docsDeleteExam,
+                        docsInsertExam
+                    }
                 })
             }
         })
         .catch(err => {
             res.status(500).json({
-                error: err
+                success: false,
+                result: {
+                    err,
+                    message: 'Update Exam Failed'
+                }
             })
         })
 }
 
 module.exports.deleteExam = (req, res, next) => {
-    var id = req.params.id;
-
+    var id = req.params.idExam;
+    console.log('delete exam :' +id);
+    
     Exam.findByIdAndRemove(id)
         .then(docs => {
-            if (!docs) {
-                return res.status(404).send({
-                    message: "Exam not found with id " + id
-                });
-            }
-            return res.status(200).json({
-                message: "Exam delete success",
-                success: true
-            });
+            ExamStudent.deleteMany({ examId: id })
+                .then(ss => {
+                    return res.status(200).json({
+                        result: { message: "Exam delete success", idExamDeleted: id },
+                        success: true
+                    });
+                })
+                .catch(err => {
+                    return res.status(500).json({
+                        result: { message: "Delete exam success, but delete question failed" },
+                        success: false
+                    });
+                })
+
         }).catch(err => {
-            if (err.kind === 'ObjectId' || err.name === 'NotFound') {
-                return res.status(404).send({
-                    message: "Exam not found with id " + id
-                });
-            }
-            return res.status(500).send({
-                message: "Could not delete Exam with id " + id
+            return res.status(500).json({
+                result: {
+                    message: "Delete exam failed 1"
+                }
             });
+
         });
 }

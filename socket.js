@@ -1,5 +1,5 @@
 let ExamStudent = require('./api/models/exam_student')
-let exam = require('./utils/exam')
+let { updateStatusStudentExam, changeStatusStudentDisconnect, changeAnswerStudent } = require('./utils/examRealtime')
 
 /**
  * REALTIME
@@ -14,12 +14,42 @@ function initializeSocket(io) {
     io.on("connection", (socket) => {
         console.log("a user connected ...");
 
-        socket.on("new_visitor", (visitor) => {
-            console.log("new_visitor", visitor)
+        /**
+         * Room EXAM
+         */
+
+        socket.on("student_join", async (data) => {
+            socket.examId = data.examId
+            socket.studentId = data.studentId
+            await updateStatusStudentExam(data)
+            console.log("student_join", data)
+            socket.broadcast.emit(`change_status_student_room_${data.examId}`)
         })
 
-        socket.on("disconnect", () => {
+        socket.on("change_answer_student", async (data) => {
+            socket.examId = data.examId
+            socket.studentId = data.studentId
+            await changeAnswerStudent(data)
+            console.log("change_answer_student", data)
+            socket.broadcast.emit(`change_answer_student_room_${data.examId}`)
+        })
+
+        socket.on("leave_room", async () => {
+            console.log("user leave room")
+            await changeStatusStudentDisconnect({
+                examId: socket.examId,
+                studentId: socket.studentId
+            })
+            socket.broadcast.emit(`change_status_student_room_${socket.examId}`)
+        })
+
+        socket.on("disconnect", async () => {
             console.log("user disconnected")
+            await changeStatusStudentDisconnect({
+                examId: socket.examId,
+                studentId: socket.studentId
+            })
+            socket.broadcast.emit(`change_status_student_room_${socket.examId}`)
         })
     })
 }

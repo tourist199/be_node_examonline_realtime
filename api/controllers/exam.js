@@ -93,7 +93,7 @@ module.exports.getExamsTeacher = (req, res) => {
 
 module.exports.getExamById = (req, res) => {
     Exam.findOne({ _id: req.params.id })
-        .populate('testId', 'title')
+        .populate('testId')
         .then(docs => {
             ExamStudent.find({ examId: req.params.id })
                 .select('_id examId studentId')

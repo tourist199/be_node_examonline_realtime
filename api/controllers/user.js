@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('./../models/user')
+const fs = require('fs');
+
 
 exports.user_login = (req, res, next) => {
   User.find({ email: req.body.email })
@@ -230,4 +232,50 @@ exports.change_user_info = (req, res, next) => {
         }
       })
     })
+}
+
+exports.updateAvatar = async (req, res) => {
+  var idUser = req.params.id;
+  var path = req.body.path;
+
+  if (req.body.path !== "") {
+    let path2 = "image/" + req.file.filename;
+    const result = await User.findOne({ _id: idUser })
+      .updateOne({ avatar: path })
+      .catch(err => {
+        res.status(500).json({
+          success: false,
+          result: {
+            err,
+            message: 'Upload avatar failed'
+          }
+        })
+      });
+    res.status(200).json({
+      success: true,
+      result: {
+        pathCurrent: path2
+      }
+    });
+  } else {
+    let path2 = req.body.avatar;
+    const da = await User.findOne({ _id: idUser }).exec();
+    if (path2 != da.avatar && (da.avatar != "image/img_avatar.png")) {
+      fs.unlink("uploads/" + da.avatar, () => { })
+    }
+    const result = await User.findOne({ _id: idUser })
+      .updateOne({ avatar: path2 })
+      .catch(err => {
+        res.status(500).json({
+          err: err
+        })
+      });
+
+    res.status(200).json({
+      path: path2,
+      message: "success",
+      nModified: result.nModified
+    });
+  }
+
 }

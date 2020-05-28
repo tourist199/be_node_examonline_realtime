@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema({
     gender: {type: String},
     birthday: {type: Date, require: true},
     address: {type: String},
+    avatar: {type: String},
     phoneNumber: {type: String},
     type: {type: String, required: true, default: 'STUDENT'},
     createAt: {type: Date, default: Date.now}

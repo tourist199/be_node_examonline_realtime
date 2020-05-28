@@ -12,7 +12,7 @@ module.exports.getStudentsInExam = async (req, res) => {
             path: 'examId',
             // Get info test of exam
             populate: { path: 'testId' }
-          })
+        })
         .exec()
         .then(docs => {
             res.status(200).json({
@@ -38,7 +38,10 @@ module.exports.getInfoExamByStudent = (req, res) => {
     let { userData } = req
 
     ExamStudent.findOne({ examId: idExam, studentId: userData.userId })
-        .select('listAnswer')
+        .populate({
+            path: 'examId',
+        })
+        .select('listAnswer examId')
         .exec()
         .then(docs => {
             res.status(200).json({
@@ -59,7 +62,7 @@ module.exports.getInfoExamByStudent = (req, res) => {
 
 module.exports.studentSubmitExam = (req, res) => {
     console.log(123);
-    
+
     let { userData } = req
     ExamStudent
         .findOneAndUpdate(

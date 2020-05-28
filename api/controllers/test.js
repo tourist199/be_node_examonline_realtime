@@ -4,6 +4,10 @@ var Question = require('../models/question')
 const mongoose = require('mongoose')
 var convertToObjectId = require('mongodb').ObjectId;
 
+/**
+ * Get test by teacher, have pagination
+ */
+
 module.exports.getAllTestPagination = (req, res) => {
     let page = parseInt(req.query.page) - 1
     skipRecord = page ? 5 * page : 0
@@ -353,7 +357,6 @@ module.exports.changeStatusTestDraft = (req, res, next) => {
 
 module.exports.deleteTest = (req, res, next) => {
     var id = req.params.id;
-
     Exam.find({ testId: id })
         .exec()
         .then((arr) => {

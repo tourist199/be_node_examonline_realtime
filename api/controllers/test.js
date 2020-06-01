@@ -208,6 +208,7 @@ module.exports.insertTestAndQuestion = (req, res) => {
                                             _id: new mongoose.Types.ObjectId(),
                                             title: item.title,
                                             description: item.description,
+                                            image: item.image,
                                             answers: item.answers,
                                             result: item.result,
                                             testId: docs._id

@@ -13,7 +13,8 @@ const testSchema = mongoose.Schema({
     totalQuestion: {
         type: Number,
         default: 0
-    }
+    },
+    type: String
 })
 
 module.exports = mongoose.model('Test', testSchema)

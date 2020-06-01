@@ -95,6 +95,22 @@ exports.get_user = async (req, res, next) => {
     })
 }
 
+exports.get_info = (req, res, next) => {
+  let { userData } = req
+  User.findOne({ _id: userData.userId })
+    .then(docs => {
+      res.status(200).json({
+        success: true,
+        result: docs
+      })
+    })
+    .catch(err => {
+      res.status(500).json({
+        err
+      })
+    })
+}
+
 exports.get_students = (req, res, next) => {
   User.find({ type: 'STUDENT' })
     .exec()
@@ -234,48 +250,38 @@ exports.change_user_info = (req, res, next) => {
     })
 }
 
+
+
 exports.updateAvatar = async (req, res) => {
   var idUser = req.params.id;
-  var path = req.body.path;
+  let path2 = "uploads/image/" + req.file.filename;
 
-  if (req.body.path !== "") {
-    let path2 = "image/" + req.file.filename;
-    const result = await User.findOne({ _id: idUser })
-      .updateOne({ avatar: path })
-      .catch(err => {
-        res.status(500).json({
-          success: false,
-          result: {
-            err,
-            message: 'Upload avatar failed'
-          }
-        })
-      });
-    res.status(200).json({
-      success: true,
-      result: {
-        pathCurrent: path2
-      }
-    });
-  } else {
-    let path2 = req.body.avatar;
-    const da = await User.findOne({ _id: idUser }).exec();
-    if (path2 != da.avatar && (da.avatar != "image/img_avatar.png")) {
-      fs.unlink("uploads/" + da.avatar, () => { })
-    }
-    const result = await User.findOne({ _id: idUser })
-      .updateOne({ avatar: path2 })
-      .catch(err => {
-        res.status(500).json({
-          err: err
-        })
-      });
+  const da = await User.findOne({ _id: idUser }).exec();
 
-    res.status(200).json({
-      path: path2,
-      message: "success",
-      nModified: result.nModified
-    });
+  if (path2 != da.avatar && (da.avatar != "uploads/image/people.png")) {
+    fs.unlink(da.avatar, () => { })
+    console.log(da.avatar);
   }
 
+  const result = await User.findOne({ _id: idUser })
+    .updateOne({ avatar: path2 })
+    .catch(err => {
+      res.status(500).json({
+        success: false,
+        result: {
+          err,
+          message: 'Upload avatar failed'
+        }
+      })
+    });
+
+  res.status(200).json({
+    success: true,
+    result: {
+      pathCurrent: path2,
+      docs: result
+    }
+  });
+
 }
+

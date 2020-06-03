@@ -32,6 +32,7 @@ exports.user_login = (req, res, next) => {
             email: user[0].email,
             userId: user[0]._id,
             type: user[0].type,
+            avatar: user[0].avatar
           },
             process.env.JWT_KEY,
             {

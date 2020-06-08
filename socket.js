@@ -34,6 +34,13 @@ function initializeSocket(io) {
             socket.broadcast.emit(`change_answer_student_room_${data.examId}`)
         })
 
+        socket.on("submit_exam", (data) => {
+            socket.examId = data.examId
+            // socket.studentId = data.studentId
+            console.log("submit")
+            socket.broadcast.emit(`change_answer_student_room_${data.examId}`)
+        })
+
         socket.on("leave_room", async () => {
             console.log("user leave room")
             await changeStatusStudentDisconnect({

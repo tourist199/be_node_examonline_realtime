@@ -13,7 +13,7 @@ exports.user_login = (req, res, next) => {
         return res.status(401).json({
           success: false,
           result: {
-            message: 'tai khoan hoac mat khau khong dung'
+            message: 'Tài khoản hoặc mật khẩu không đúng !'
           }
         })
       }
@@ -22,7 +22,7 @@ exports.user_login = (req, res, next) => {
           return res.status(401).json({
             success: false,
             result: {
-              message: 'tai khoan hoac mat khau khong dung1'
+              message: 'Tài khoản hoặc mật khẩu không đúng !'
             }
           })
         }
@@ -48,14 +48,14 @@ exports.user_login = (req, res, next) => {
 
             })
             .catch(err => {
-              console.log(err, 'loi cap nhat token');
+              console.log(err, 'Lỗi cập nhật token');
 
             })
 
           return res.status(200).json({
             success: true,
             result: {
-              message: 'Login success',
+              message: 'Đăng nhập thành công',
               token,
               type,
               name,
@@ -67,7 +67,7 @@ exports.user_login = (req, res, next) => {
         return res.status(500).json({
           success: false,
           result: {
-            message: 'Sai mat khau'
+            message: 'Sai mật khẩu !!'
           }
         })
       })

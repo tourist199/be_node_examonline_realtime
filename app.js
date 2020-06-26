@@ -16,7 +16,7 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
-const URL = "mongodb+srv://khanh:khanhadmin@cluster0-xpqhc.gcp.mongodb.net/test?retryWrites=true&w=majority";
+const URL = "mongodb+srv://khanh:khanhadmin@cluster0-xpqhc.gcp.mongodb.net/ExamDB?retryWrites=true&w=majority";
 mongoose.connect(URL)
 mongoose.Promise = global.Promise
 
@@ -50,7 +50,7 @@ app.use((err, req, res, next) => {
     res.json({
         success: false,
         result: {
-            message: 'APP - FAILED - SAI DUONG DAN',
+            message: 'APP - FAILED',
             err: err
         }
     })

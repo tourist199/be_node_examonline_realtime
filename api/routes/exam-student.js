@@ -8,4 +8,6 @@ router.get("/get-students-in-exam/:idExam", ExamStudentController.getStudentsInE
 
 router.get("/get-info-by-student/:idExam", ExamStudentController.getInfoExamByStudent)
 
+router.get("/get-exam-student/:idExamStudent", ExamStudentController.getExamStudentById)
+
 module.exports = router

@@ -50,6 +50,12 @@ function initializeSocket(io) {
             socket.broadcast.emit(`change_status_student_room_${socket.examId}`)
         })
 
+        socket.on("update_test",  () => {
+            socket.broadcast.emit(`update_test_student`)
+            console.log('chay dc');
+            
+        })
+
         socket.on("disconnect", async () => {
             console.log("user disconnected")
             await changeStatusStudentDisconnect({

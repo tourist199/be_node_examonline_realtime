@@ -2,7 +2,6 @@ const ExamStudent = require('../models/exam_student')
 const mongoose = require('mongoose')
 var convertToObjectId = require('mongodb').ObjectId;
 
-
 module.exports.getStudentsInExam = async (req, res) => {
     let idExam = req.params.idExam
 
@@ -60,9 +59,32 @@ module.exports.getInfoExamByStudent = (req, res) => {
         });
 }
 
-module.exports.studentSubmitExam = (req, res) => {
-    console.log(123);
+module.exports.getExamStudentById = (req, res) => {
+    let _id = req.params.idExamStudent
+    ExamStudent.findOne({ _id })
+        .populate({
+            path: 'examId',
+            populate: { path: 'testId' }
+        })
+        .exec()
+        .then(docs => {
+            res.status(200).json({
+                success: true,
+                result: docs
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                result: {
+                    error: err,
+                    message: "fails",
+                }
+            });
+        });
+}
 
+module.exports.studentSubmitExam = (req, res) => {
     let { userData } = req
     ExamStudent
         .findOneAndUpdate(

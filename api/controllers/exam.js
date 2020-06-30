@@ -119,21 +119,6 @@ module.exports.getExamById = (req, res) => {
         });
 }
 
-module.exports.getExamByID = (req, res, next) => {
-    const id = req.params.id;
-
-    Exam.findOne({ _id: id })
-        .exec()
-        .then(docs => {
-            res.status(200).json(docs);
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            });
-        });
-}
-
 module.exports.insertExam = (req, res) => {
     var data = req.body;
     var exam = new Exam({

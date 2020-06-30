@@ -192,6 +192,7 @@ module.exports.insertTestAndQuestion = (req, res) => {
         createAt: data.createAt,
         createdBy: convertToObjectId(data.createdBy),
         status: data.status,
+        type: data.type,
         totalQuestion: data.listQuestion.length
     });
     test
@@ -306,16 +307,16 @@ module.exports.updateTest = (req, res, next) => {
         })
 }
 
-module.exports.changeStatusTestDone = (req, res, next) => {
+module.exports.changeStatusTestDone = async (req, res, next) => {
     const { id } = req.params;
-    Test.find({ _id: convertToObjectId(id) })
-        .updateOne({ $set: { status: 'DONE' } })
-        .exec()
+    console.log(id);
+
+    Test.findOneAndUpdate({ _id: convertToObjectId(id) }, { status: 'DONE' }, { new: true })
         .then(result => {
             res.status(202).json({
                 success: true,
                 result: {
-                    err,
+                    result,
                     message: "Change Status Success - DONE"
                 }
             })
@@ -333,14 +334,12 @@ module.exports.changeStatusTestDone = (req, res, next) => {
 
 module.exports.changeStatusTestDraft = (req, res, next) => {
     const { id } = req.params;
-    Test.find({ _id: convertToObjectId(id) })
-        .updateOne({ $set: { status: 'DRAFT' } })
-        .exec()
+    Test.findOneAndUpdate({ _id: convertToObjectId(id) }, { status: 'DRAFT' }, { new: true })
         .then(result => {
             res.status(202).json({
                 success: true,
                 result: {
-                    err,
+                    result,
                     message: "Change Status Success - DONE"
                 }
             })

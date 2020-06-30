@@ -13,7 +13,7 @@ exports.user_login = (req, res, next) => {
         return res.status(401).json({
           success: false,
           result: {
-            message: 'tai khoan hoac mat khau khong dung'
+            message: 'Tài khoản hoặc mật khẩu không đúng !'
           }
         })
       }
@@ -22,16 +22,18 @@ exports.user_login = (req, res, next) => {
           return res.status(401).json({
             success: false,
             result: {
-              message: 'tai khoan hoac mat khau khong dung1'
+              message: 'Tài khoản hoặc mật khẩu không đúng !'
             }
           })
         }
         if (rs) {
-          const { type, name, _id } = user[0]
+          const { type, name, _id, avatar } = user[0]
+          
           const token = jwt.sign({
             email: user[0].email,
             userId: user[0]._id,
             type: user[0].type,
+            avatar: user[0].avatar
           },
             process.env.JWT_KEY,
             {
@@ -46,25 +48,26 @@ exports.user_login = (req, res, next) => {
 
             })
             .catch(err => {
-              console.log(err, 'loi cap nhat token');
+              console.log(err, 'Lỗi cập nhật token');
 
             })
 
           return res.status(200).json({
             success: true,
             result: {
-              message: 'Login success',
+              message: 'Đăng nhập thành công',
               token,
               type,
               name,
-              _id
+              _id,
+              avatar
             }
           })
         }
         return res.status(500).json({
           success: false,
           result: {
-            message: 'Sai mat khau'
+            message: 'Sai mật khẩu !!'
           }
         })
       })
